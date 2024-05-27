@@ -24,12 +24,3 @@ class account_path(PurePosixPath):
     def get_child(self) -> account_path:
         return account_path('/'.join(self.parts[1:]))
 
-test = Path("/root/a/b/c/")
-
-ap = account_path('root/a/b/c/')
-print(ap.name)
-print(ap.parent)
-
-ap2 = ap / "d"
-print(ap2)
-print(ap2.get_child())

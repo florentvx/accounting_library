@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from account_path import account_path
+from .account_path import account_path
 
 class account:
     def __init__(
@@ -32,6 +32,8 @@ class account:
         self.value = new_value
 
     def get_account(self, path: account_path):
+        if path is None:
+            return self
         if path.root_folder != self.name:
             raise ValueError("")
         if path.is_singleton:
@@ -70,13 +72,28 @@ class account:
     def print_structure(self):
         self._print_structure(structure = self.get_account_structure(), level=0)
 
-a1 = account("a1", value = 100)
-a2 = account("a2", value = 50)
-a = account("a", sub_accounts=[a1,a2])
-b= account(name="b", value=123)
-root = account("root", sub_accounts=[a,b])
+    def _get_account_value(self):
+        if self.is_terminal:
+            return self.value
+        return sum([
+            sa._get_account_value()
+            for sa in self.sub_accounts
+        ])
+    
+    def _get_account_summary(self):
+        if self.is_terminal:
+            raise ValueError()
+        else:
+            return [
+                [sa.name, sa._get_account_value()] 
+                for sa in self.sub_accounts
+            ]
+    
+    def get_account_value(self, path: account_path = None):
+        return self.get_account(path)._get_account_value()
+    
+    def get_account_summary(self, path: account_path = None):
+        return self.get_account(path)._get_account_summary()
+        
+        
 
-res = root.get_account(account_path('root/a/a1'))
-popo = root.get_account_structure()
-root.print_structure()
-print("END")
