@@ -94,6 +94,16 @@ class account:
     
     def get_account_summary(self, path: account_path = None):
         return self.get_account(path)._get_account_summary()
+    
+    def add_account(self, path: account_path, is_terminal: bool):
+        sub_acc = self.get_account(path.parent)
+        test_l = [sa for sa in sub_acc.sub_accounts if sa.name == path.name]
+        if len(test_l) != 0:
+            raise ValueError()
+        if is_terminal:
+            sub_acc.sub_accounts += [account(path.name, value=0)]
+        else:
+            sub_acc.sub_accounts += [account(path.name, sub_accounts=[])]
         
         
 

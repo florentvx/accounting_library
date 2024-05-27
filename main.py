@@ -21,4 +21,10 @@ root.print_structure()
 
 summary = root.get_account_summary()
 
+root.add_account(account_path('root/c'),is_terminal=True)
+root.add_account(account_path('root/a/a_0'),is_terminal=False)
+root.add_account(account_path('root/a/a_0/this is good'),is_terminal=True)
+
+root.print_structure()
+
 print("END")
