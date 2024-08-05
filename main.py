@@ -1,14 +1,5 @@
 from src import *
 
-ap = account_path('root/a/b/c/')
-print(ap.name)
-print(ap.parent)
-
-ap2 = ap / "d"
-print(ap2)
-print(ap2.get_child())
-
-
 a1 = account("a1", value = 100)
 a2 = account("a2", value = 50)
 a = account("a", sub_accounts=[a1,a2])
