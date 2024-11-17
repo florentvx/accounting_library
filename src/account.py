@@ -7,6 +7,7 @@ class account:
     def __init__(
             self,
             name: str,
+            unit: str,
             *,
             value: float | None = None,
             sub_accounts: list[account] | None = None
@@ -20,6 +21,7 @@ class account:
             raise ValueError(f"account name is not set properly [{name}]")
         
         self.name: str = name
+        self.unit : str = unit
         self.value: float | None = value
         self.sub_accounts : list[account] | None = sub_accounts
 
@@ -65,48 +67,64 @@ class account:
 
     def _print_structure(self, structure, level):
         acc_p, rest_struct = structure
+        acc_p: account_path
         if rest_struct is None:
-            print(f"{'  ' * level} {level}. {acc_p} -> {self.get_account(acc_p).value}")
+            acc = self.get_account(acc_p.get_child())
+            yield f"{'  ' * level} {level}. {acc_p} -> {acc.value} {acc.unit}"
         else:    
-            print(f"{'  ' * level} {level}. {acc_p}")
+            yield f"{'  ' * level} {level}. {acc_p}"
             for child in rest_struct:
-                self._print_structure(child, level + 1)
+                for y in self._print_structure(child, level + 1):
+                    yield y
 
-    def print_structure(self):
-        self._print_structure(structure = self.get_account_structure(), level=0)
+    def print_structure(self, do_print: bool = True) -> str:
+        res = ""
+        for x in self._print_structure(structure = self.get_account_structure(), level=0):
+            res += x + "\n"
+            print(x)
+        return res
 
-    def _get_account_value(self):
+    def _get_account_value(self, unit: str|None = None):
+        if unit is None:
+            unit = self.unit
         if self.is_terminal:
+            if unit != self.unit:
+                raise ValueError(f"not implemeted yet conversion between {unit} and {self.unit}")
             return self.value
         return sum([
-            sa._get_account_value()
+            sa._get_account_value(self.unit)
             for sa in self.sub_accounts
         ])
     
-    def _get_account_summary(self):
+    def _get_account_summary(self, unit):
+        if unit is None:
+            unit = self.unit
         if self.is_terminal:
             raise ValueError()
         else:
             return [
-                [sa.name, sa._get_account_value()] 
+                [sa.name, sa._get_account_value(unit)] 
                 for sa in self.sub_accounts
             ]
     
-    def get_account_value(self, path: account_path = None):
-        return self.get_account(path)._get_account_value()
+    def get_account_value(self, path: account_path = None, unit: str = None):
+        return self.get_account(path)._get_account_value(unit)
     
-    def get_account_summary(self, path: account_path = None):
-        return self.get_account(path)._get_account_summary()
+    def get_account_summary(self, path: account_path = None, unit: str = None):
+        return self.get_account(path)._get_account_summary(unit)
     
-    def add_account(self, path: account_path, is_terminal: bool):
+    def add_account(self, path: account_path, is_terminal: bool, unit: str = None):
         sub_acc = self.get_account(path.parent)
+        if sub_acc.is_terminal:
+            raise ValueError("cannot add account to a terminal account")
         test_l = [sa for sa in sub_acc.sub_accounts if sa.name == path.name]
         if len(test_l) != 0:
             raise ValueError()
+        unit_to_use = unit if (not unit is None) else sub_acc.unit
         if is_terminal:
-            sub_acc.sub_accounts += [account(path.name, value=0)]
+            sub_acc.sub_accounts += [account(path.name, value=0, unit=unit_to_use)]
         else:
-            sub_acc.sub_accounts += [account(path.name, sub_accounts=[])]
+            sub_acc.sub_accounts += [account(path.name, sub_accounts=[], unit=unit_to_use)]
         
         
 

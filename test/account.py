@@ -3,20 +3,20 @@ from src import account, account_path
 
 def test_account():
 
-    acc = account("acc", value = 100)
-    acc_empty = account("acc_sv_2", sub_accounts=[])
-    acc_sa01 = account("sa01", value = 12)
+    acc = account("acc", value = 100, unit="EUR")
+    acc_empty = account("acc_sv_2", sub_accounts=[], unit="EUR")
+    acc_sa01 = account("sa01", value = 12, unit = "EUR")
     acc_2 = account("acc2", sub_accounts=[
-        account("sa0", value = 102),
+        account("sa0", value = 102, unit = "EUR"),
         account("sa1", sub_accounts= [
-            account("sa00", value = 52),
+            account("sa00", value = 52, unit = "EUR"),
             acc_sa01,
-        ]),
+        ], unit = "EUR"),
         account("sa3", sub_accounts=[
-            account("x", value=100000),
-            account("x", sub_accounts=[]),
-        ]),
-    ])
+            account("x", value=100000, unit = "EUR"),
+            account("y", sub_accounts=[], unit = "EUR"),
+        ], unit = "EUR"),
+    ], unit = "EUR")
 
     #region __init__
 
@@ -49,17 +49,17 @@ def test_account():
 
     #region is_terminal
 
-    terminal = account("singleton", value=10)
+    terminal = account("singleton", value=10, unit="EUR")
     assert terminal.is_terminal
 
-    intermediary_empty = account("int_empty", sub_accounts=[])
+    intermediary_empty = account("int_empty", sub_accounts=[], unit="EUR")
     assert not intermediary_empty.is_terminal
 
     #endregion
 
     #region set_value
     
-    acc1 = account("acc_sv_1", value=0)
+    acc1 = account("acc_sv_1", value=0, unit="EUR")
     acc1.set_value(101)
     assert acc1.value == 101
 
@@ -105,8 +105,9 @@ def test_account():
     test_ga_4 = False
     try:
         acc_2.get_account(acc_p4)
-    except:
         test_ga_4 = True
+    except:
+        test_ga_4 = False
     assert test_ga_4
 
     #endregion
@@ -114,9 +115,8 @@ def test_account():
     #region get_account_structure
     
     test_ = acc_2.get_account_structure(None)
-    assert str(test_) == "(account_path('acc2'), " + \
-        "[(account_path('acc2/sa0'), None), (account_path('acc2/sa1'), " + \
-        "[(account_path('acc2/sa1/sa00'), None), (account_path('acc2/sa1/sa01'), None)]), (account_path('acc2/sa3'), " + \
-        "[(account_path('acc2/sa3/x'), None), (account_path('acc2/sa3/x'), [])])])"
+    popo = acc_2.print_structure()
+    assert popo == ' 0. acc2\n   1. acc2/sa0 -> 102 EUR\n   1. acc2/sa1\n     2. acc2/sa1/sa00 -> 52 EUR\n  '+\
+        '   2. acc2/sa1/sa01 -> 12 EUR\n   1. acc2/sa3\n     2. acc2/sa3/x -> 100000 EUR\n     2. acc2/sa3/y\n'
 
     #endregion
