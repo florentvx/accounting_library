@@ -1,22 +1,27 @@
 from __future__ import annotations
-from src import account, account_path
+
+from src.account_path import account_path
+from src.asset import asset
+from src.account import account
 
 def test_account():
 
-    acc = account("acc", value = 100, unit="EUR")
-    acc_empty = account("acc_sv_2", sub_accounts=[], unit="EUR")
-    acc_sa01 = account("sa01", value = 12, unit = "EUR")
+    eur = asset("EUR", "€")
+
+    acc = account("acc", value = 100, unit=eur)
+    acc_empty = account("acc_sv_2", sub_accounts=[], unit=eur)
+    acc_sa01 = account("sa01", value = 12, unit = eur)
     acc_2 = account("acc2", sub_accounts=[
-        account("sa0", value = 102, unit = "EUR"),
+        account("sa0", value = 102, unit = eur),
         account("sa1", sub_accounts= [
-            account("sa00", value = 52, unit = "EUR"),
+            account("sa00", value = 52, unit = eur),
             acc_sa01,
-        ], unit = "EUR"),
+        ], unit = eur),
         account("sa3", sub_accounts=[
-            account("x", value=100000, unit = "EUR"),
-            account("y", sub_accounts=[], unit = "EUR"),
-        ], unit = "EUR"),
-    ], unit = "EUR")
+            account("x", value=100000, unit = eur),
+            account("y", sub_accounts=[], unit = eur),
+        ], unit = eur),
+    ], unit = eur)
 
     #region __init__
 
@@ -49,17 +54,17 @@ def test_account():
 
     #region is_terminal
 
-    terminal = account("singleton", value=10, unit="EUR")
+    terminal = account("singleton", value=10, unit=eur)
     assert terminal.is_terminal
 
-    intermediary_empty = account("int_empty", sub_accounts=[], unit="EUR")
+    intermediary_empty = account("int_empty", sub_accounts=[], unit=eur)
     assert not intermediary_empty.is_terminal
 
     #endregion
 
     #region set_value
     
-    acc1 = account("acc_sv_1", value=0, unit="EUR")
+    acc1 = account("acc_sv_1", value=0, unit=eur)
     acc1.set_value(101)
     assert acc1.value == 101
 

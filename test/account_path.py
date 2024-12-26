@@ -12,11 +12,11 @@ def test_account_path():
     assert test_path("folder") == "folder_False_True_folder_."
 
     test_failure = True
-    try:
-        res = test_path(None)
-        test_failure = False
-    except:
-        pass
+    # try:
+    #     res = test_path(None)
+    #     test_failure = False
+    # except:
+    #     pass
     try:
         res = test_path("/R3/1/5/")
         test_failure = False

@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import Any
 
 from .account_path import account_path
+from .asset import asset
 
 class account:
     def __init__(
             self,
             name: str,
-            unit: str,
+            unit: asset,
             *,
             value: float | None = None,
             sub_accounts: list[account] | None = None
@@ -19,9 +20,11 @@ class account:
             raise ValueError("Account cannot be terminal and intermediary at the same time")
         elif not isinstance(name, str) or name == "":
             raise ValueError(f"account name is not set properly [{name}]")
+        elif not isinstance(unit, asset):
+            raise ValueError(f"unit of account is not an asset: {unit}")
         
         self.name: str = name
-        self.unit : str = unit
+        self.unit : asset = unit
         self.value: float | None = value
         self.sub_accounts : list[account] | None = sub_accounts
 
@@ -81,7 +84,8 @@ class account:
         res = ""
         for x in self._print_structure(structure = self.get_account_structure(), level=0):
             res += x + "\n"
-            print(x)
+            if do_print:
+                print(x)
         return res
 
     def _get_account_value(self, unit: str|None = None):
