@@ -18,6 +18,8 @@ class asset:
         return self.name
     
     def show_value(self, value):
+        if value == 0:
+            return f'{self.symbol} 0'
         factor = 1 if value >= 0 else -1
         value = abs(value)
         remainer = int(round(value * 10 ** self.decimal_param - int(value)* 10 ** self.decimal_param,0))

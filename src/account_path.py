@@ -18,6 +18,9 @@ class account_path:
             return '.'
         return "/".join(self.parts)
     
+    def __repr__(self):
+        return f"account_path({str(self)})"
+    
     def __truediv__(self, other: str|account_path):
         if isinstance(other, str):
             if len(self.parts) == 0:

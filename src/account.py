@@ -72,16 +72,18 @@ class account:
     def _print_structure(self, structure, level):
         acc_p, rest_struct = structure
         acc_p: account_path
+        acc = self.get_account(acc_p.get_child())
         if rest_struct is None:
-            acc = self.get_account(acc_p.get_child())
             yield f"{'  ' * level} {level}. {acc_p} -> {acc.unit.show_value(acc.value)}"
         else:    
-            yield f"{'  ' * level} {level}. {acc_p}"
+            yield f"{'  ' * level} {level}. {acc_p} : {acc.unit.name}"
             for child in rest_struct:
                 for y in self._print_structure(child, level + 1):
                     yield y
 
     def print_structure(self, do_print: bool = False) -> str:
+        if do_print:
+            print(f"\nAccount Structure: {self.name}")
         res = ""
         for x in self._print_structure(structure = self.get_account_structure(), level=0):
             res += x + "\n"
@@ -133,6 +135,7 @@ class account:
             space2 = 15 - len_val1
             res += f'{name}:{" " * space1}{value1}{" " * space2}{value2}\n'
         if do_print:
+            print(f"\nAccount Summary: {self.name} {self.unit.name}")
             print(res)
         return res
 
