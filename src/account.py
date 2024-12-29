@@ -3,6 +3,7 @@ from typing import Any
 
 from .account_path import account_path
 from .asset import asset
+from .fx_market import fx_market
 
 class account:
     def __init__(
@@ -73,14 +74,14 @@ class account:
         acc_p: account_path
         if rest_struct is None:
             acc = self.get_account(acc_p.get_child())
-            yield f"{'  ' * level} {level}. {acc_p} -> {acc.value} {acc.unit}"
+            yield f"{'  ' * level} {level}. {acc_p} -> {acc.unit.show_value(acc.value)}"
         else:    
             yield f"{'  ' * level} {level}. {acc_p}"
             for child in rest_struct:
                 for y in self._print_structure(child, level + 1):
                     yield y
 
-    def print_structure(self, do_print: bool = True) -> str:
+    def print_structure(self, do_print: bool = False) -> str:
         res = ""
         for x in self._print_structure(structure = self.get_account_structure(), level=0):
             res += x + "\n"
@@ -88,35 +89,53 @@ class account:
                 print(x)
         return res
 
-    def _get_account_value(self, unit: str|None = None):
+    def _get_account_value(self, fx_mkt: fx_market, unit: str|None = None):
         if unit is None:
             unit = self.unit
         if self.is_terminal:
-            if unit != self.unit:
-                raise ValueError(f"not implemeted yet conversion between {unit} and {self.unit}")
-            return self.value
+            return self.value * fx_mkt.get_quote(self.unit, unit)
         return sum([
-            sa._get_account_value(self.unit)
+            sa._get_account_value(fx_mkt, unit)
             for sa in self.sub_accounts
         ])
     
-    def _get_account_summary(self, unit):
+    def _get_account_summary(self, fx_mkt: fx_market, unit: asset):
         if unit is None:
             unit = self.unit
         if self.is_terminal:
             raise ValueError()
         else:
             return [
-                [sa.name, sa._get_account_value(unit)] 
+                [sa.name, [sa._get_account_value(fx_mkt, sa.unit), sa.unit], [sa._get_account_value(fx_mkt, unit), unit]] 
                 for sa in self.sub_accounts
             ]
     
-    def get_account_value(self, path: account_path = None, unit: str = None):
-        return self.get_account(path)._get_account_value(unit)
+    def get_account_value(self, fx_mkt: fx_market, path: account_path = None, unit: str = None):
+        return self.get_account(path)._get_account_value(fx_mkt, unit)
     
-    def get_account_summary(self, path: account_path = None, unit: str = None):
-        return self.get_account(path)._get_account_summary(unit)
-    
+    def get_account_summary(self, fx_mkt: fx_market, path: account_path = None, unit: str = None):
+        return self.get_account(path)._get_account_summary(fx_mkt, unit)
+        
+    def print_account_summary(
+            self, fx_mkt: fx_market, 
+            path: account_path = None, unit: str = None,
+            do_print: bool = False,
+        ):
+        tmp = self.get_account_summary(fx_mkt, path, unit)
+        res = ""
+        for x in tmp:
+            name = x[0]
+            value1 = x[1][1].show_value(x[1][0])
+            value2 = x[2][1].show_value(x[2][0])
+            len_name = len(name)
+            space1 = 10 - len_name
+            len_val1 = len(value1)
+            space2 = 15 - len_val1
+            res += f'{name}:{" " * space1}{value1}{" " * space2}{value2}\n'
+        if do_print:
+            print(res)
+        return res
+
     def add_account(self, path: account_path, is_terminal: bool, unit: str = None):
         sub_acc = self.get_account(path.parent)
         if sub_acc.is_terminal:
