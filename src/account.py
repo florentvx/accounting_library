@@ -29,6 +29,9 @@ class account:
         self.value: float | None = value
         self.sub_accounts : list[account] | None = sub_accounts
 
+    def __str__(self):
+        return f"{self.name} {self.unit}"
+    
     @property
     def is_terminal(self):
         return self.value is not None
@@ -38,7 +41,7 @@ class account:
             raise ValueError("cannot set value on a intermediary account")
         self.value = new_value
 
-    def get_account(self, path: account_path | None):
+    def get_account(self, path: account_path | None) -> account:
         if path is None or path.is_empty:
             return self
         # if path.root_folder not in [x.name for x in self.sub_accounts]:
@@ -108,7 +111,11 @@ class account:
             raise ValueError()
         else:
             return [
-                [sa.name, [sa._get_account_value(fx_mkt, sa.unit), sa.unit], [sa._get_account_value(fx_mkt, unit), unit]] 
+                [
+                    sa.name, 
+                    [sa._get_account_value(fx_mkt, sa.unit), sa.unit], 
+                    [sa._get_account_value(fx_mkt, unit), unit]
+                ] 
                 for sa in self.sub_accounts
             ]
     
@@ -151,6 +158,12 @@ class account:
             sub_acc.sub_accounts += [account(path.name, value=0, unit=unit_to_use)]
         else:
             sub_acc.sub_accounts += [account(path.name, sub_accounts=[], unit=unit_to_use)]
-        
+
+    def copy(self) -> account:
+        if self.sub_accounts is None:
+            return account(self.name + '', unit= self.unit.copy(), value=self.value)
+        else:
+            return account(
+                self.name + '', self.unit.copy(), sub_accounts=[acc.copy() for acc in self.sub_accounts])
         
 

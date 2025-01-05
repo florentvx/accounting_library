@@ -2,6 +2,7 @@ from .account_path import test_account_path
 from .asset import test_asset
 from .account import test_account
 from .fx_market import test_fx_market
+from .statement import test_statement
 
 def run_all_tests():
     print("Running account_path test")
@@ -12,3 +13,5 @@ def run_all_tests():
     test_fx_market()
     print("Running account test")
     test_account()
+    print("Running statement test")
+    test_statement()

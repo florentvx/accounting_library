@@ -1,3 +1,4 @@
+from __future__ import annotations
 import math
 
 class asset:
@@ -16,6 +17,23 @@ class asset:
     
     def __repr__(self):
         return self.name
+    
+    def __hash__(self):
+        return (self.name + self.symbol + self.decimal_symbol + self.separator_symbol + \
+            str(self.decimal_param)+ str(self.separator_param)).__hash__()
+
+    def __eq__(self, other: asset):
+        return self.__hash__() == other.__hash__()
+
+    def copy(self) -> asset:
+        return asset(
+            self.name + '',
+            self.symbol + '',
+            self.decimal_symbol + '',
+            self.separator_symbol + '',
+            self.decimal_param + 0,
+            self.separator_param + 0,
+        )
     
     def show_value(self, value):
         if value == 0:

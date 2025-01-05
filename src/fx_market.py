@@ -6,6 +6,14 @@ class fx_market:
     def __init__(self):
         self.quotes : dict[tuple[asset, asset], float] = {}
 
+    def copy(self) -> fx_market:
+        res = fx_market()
+        res.quotes = {
+            (k[0].copy(), k[1].copy()): v + 0
+            for (k,v) in self.quotes.items()
+        }
+        return res
+
     def _filter_quote_dict(
             self, 
             asset: asset, 
