@@ -3,6 +3,7 @@ from typing import Any
 
 from .account_path import account_path
 from .asset import asset
+from .price import price
 from .fx_market import fx_market
 
 class account:
@@ -35,6 +36,13 @@ class account:
     @property
     def is_terminal(self):
         return self.value is not None
+
+    @property
+    def price(self) -> price:
+        if self.is_terminal:
+            return price(self.value, self.unit)
+        else:
+            return None
 
     def set_value(self, new_value):
         if not self.is_terminal:
@@ -94,7 +102,11 @@ class account:
                 print(x)
         return res
 
-    def _get_account_value(self, fx_mkt: fx_market, unit: str|None = None):
+    def _get_account_value(
+            self, 
+            fx_mkt: fx_market,
+            unit: asset|None = None,
+        ) -> float:
         if unit is None:
             unit = self.unit
         if self.is_terminal:
@@ -104,7 +116,21 @@ class account:
             for sa in self.sub_accounts
         ])
     
-    def _get_account_summary(self, fx_mkt: fx_market, unit: asset):
+    def _get_account_price(
+            self,
+            fx_mkt: fx_market,
+            unit: asset|None = None,
+        ) -> price:
+        return price(
+            self._get_account_value(fx_mkt, unit), 
+            unit if not unit is None else self.unit
+        )
+    
+    def _get_account_summary(
+            self, 
+            fx_mkt: fx_market, 
+            unit: asset,
+        ) -> list[tuple[str, price, price]]:
         if unit is None:
             unit = self.unit
         if self.is_terminal:
@@ -113,40 +139,43 @@ class account:
             return [
                 [
                     sa.name, 
-                    [sa._get_account_value(fx_mkt, sa.unit), sa.unit], 
-                    [sa._get_account_value(fx_mkt, unit), unit]
+                    sa._get_account_price(fx_mkt, sa.unit), 
+                    sa._get_account_price(fx_mkt, unit)
                 ] 
                 for sa in self.sub_accounts
             ]
     
-    def get_account_value(self, fx_mkt: fx_market, path: account_path = None, unit: str = None):
-        return self.get_account(path)._get_account_value(fx_mkt, unit)
+    def get_account_price(
+            self, 
+            fx_mkt: fx_market, 
+            path: account_path = None, 
+            unit: str = None,
+        ) -> price:
+        return self.get_account(path)._get_account_price(fx_mkt, unit)
     
     def get_account_summary(self, fx_mkt: fx_market, path: account_path = None, unit: str = None):
         return self.get_account(path)._get_account_summary(fx_mkt, unit)
         
     def print_account_summary(
             self, fx_mkt: fx_market, 
-            path: account_path = None, unit: str = None,
+            path: account_path = None,
+            unit: str = None,
             do_print: bool = False,
-        ):
-        tmp = self.get_account_summary(fx_mkt, path, unit)
+        ) -> str:
         res = ""
-        for x in tmp:
-            name = x[0]
-            value1 = x[1][1].show_value(x[1][0])
-            value2 = x[2][1].show_value(x[2][0])
+        for name, price1, price2 in self.get_account_summary(fx_mkt, path, unit):
+            value1 = str(price1)
             len_name = len(name)
             space1 = 10 - len_name
             len_val1 = len(value1)
             space2 = 15 - len_val1
-            res += f'{name}:{" " * space1}{value1}{" " * space2}{value2}\n'
+            res += f'{name}:{" " * space1}{value1}{" " * space2}{price2}\n'
         if do_print:
             print(f"\nAccount Summary: {self.name} {self.unit.name}")
             print(res)
         return res
 
-    def add_account(self, path: account_path, is_terminal: bool, unit: str = None):
+    def add_account(self, path: account_path, is_terminal: bool, unit: str = None) -> None:
         sub_acc = self.get_account(path.parent)
         if sub_acc.is_terminal:
             raise ValueError("cannot add account to a terminal account")
@@ -164,6 +193,8 @@ class account:
             return account(self.name + '', unit= self.unit.copy(), value=self.value)
         else:
             return account(
-                self.name + '', self.unit.copy(), sub_accounts=[acc.copy() for acc in self.sub_accounts])
+                self.name + '', self.unit.copy(),
+                sub_accounts=[acc.copy() for acc in self.sub_accounts]
+            )
         
 
