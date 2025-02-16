@@ -18,6 +18,7 @@ class statement:
         self.date : dt.datetime = date
         self.fx_market : fx_market = fx_mkt
         self.account : account = acc
+        self.print_summary(do_print=False) # forces the computation of all fx quotes needed
     
     def copy_statement(self, date: dt.datetime):
         return statement(date, self.fx_market.copy(), self.account.copy())
@@ -48,8 +49,14 @@ class statement:
         else:
             raise ValueError(f"account: [{acc}] is terminal")
     
+    def print_structure(self, do_print: bool = False) -> str:
+        res = self.account.print_structure(do_print=False) + "\n" + self.fx_market.print(do_print=False)
+        if do_print:
+            print(res)
+        return res
+    
     def print_summary(self, path: account_path = None, unit: asset = None, do_print: bool = False):
-        res = f"Statement: {self.date}\n"
+        res = f"Statement: {self.date.date().isoformat()}\n"
         res += self.account.print_account_summary(self.fx_market, path, unit, do_print=False)
         if do_print:
             print(res)

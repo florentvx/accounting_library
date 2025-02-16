@@ -6,6 +6,15 @@ class fx_market:
     def __init__(self):
         self.quotes : dict[tuple[asset, asset], float] = {}
 
+    def print(self, do_print : bool = False):
+        res = "FX Market: \n"
+        for t, v in self.quotes.items():
+            res += f"{t[0].name}/{t[1].name} : {round(v,4)}\n"
+        if do_print:
+            print(res)
+        return res
+
+
     def copy(self) -> fx_market:
         res = fx_market()
         res.quotes = {
@@ -13,6 +22,9 @@ class fx_market:
             for (k,v) in self.quotes.items()
         }
         return res
+    
+    def get_asset_database(self) -> set[asset]:
+        return {k[0] for k in self.quotes} | {k[1] for k in self.quotes}
 
     def _filter_quote_dict(
             self, 
