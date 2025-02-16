@@ -6,14 +6,11 @@ class fx_market:
     def __init__(self):
         self.quotes : dict[tuple[asset, asset], float] = {}
 
-    def print(self, do_print : bool = False):
+    def __str__(self) -> str:
         res = "FX Market: \n"
         for t, v in self.quotes.items():
             res += f"{t[0].name}/{t[1].name} : {round(v,4)}\n"
-        if do_print:
-            print(res)
         return res
-
 
     def copy(self) -> fx_market:
         res = fx_market()

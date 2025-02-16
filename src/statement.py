@@ -50,7 +50,7 @@ class statement:
             raise ValueError(f"account: [{acc}] is terminal")
     
     def print_structure(self, do_print: bool = False) -> str:
-        res = self.account.print_structure(do_print=False) + "\n" + self.fx_market.print(do_print=False)
+        res = self.account.print_structure(do_print=False) + "\n" + str(self.fx_market)
         if do_print:
             print(res)
         return res
