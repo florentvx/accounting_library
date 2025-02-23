@@ -55,6 +55,8 @@ class account:
         # if path.root_folder not in [x.name for x in self.sub_accounts]:
         #     raise ValueError(f"your account path {path} does refer to an unisting sub_account {path.root_folder}")
         # child_path = path.get_child()
+        if self.sub_accounts is None:
+            raise ValueError(f"account {self.name} is terminal and cannot have sub_accounts")
         sa_match_list = [sa for sa in self.sub_accounts if sa.name.upper() == path.root_folder.upper()]
         if len(sa_match_list) == 0:
             raise ValueError(f"No match for subaccount {path.root_folder}")
