@@ -5,6 +5,7 @@ from .asset import asset
 class fx_market:
     def __init__(self):
         self.quotes : dict[tuple[asset, asset], float] = {}
+        self.secondary_quotes : dict[tuple[asset, asset], float] = {}
 
     def __str__(self) -> str:
         res = "FX Market: \n"
@@ -30,7 +31,7 @@ class fx_market:
             filter_asset_list : list[asset] = [],
         ) -> dict[tuple[asset, asset], float]:
         if quote_dict is None:
-            quote_dict = self.quotes
+            quote_dict = {**self.quotes, **self.secondary_quotes}
         return {
             k: v 
             for (k, v) in quote_dict.items() 
@@ -68,7 +69,7 @@ class fx_market:
             )
             if not res is None:
                 result = asset_value * res
-                self.quotes[(asset1, asset2)] = result
+                self.secondary_quotes[(asset1, asset2)] = result
                 return result
             
     def get_quote(self, asset1, asset2):

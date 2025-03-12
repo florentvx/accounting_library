@@ -61,3 +61,34 @@ class statement:
         if do_print:
             print(res)
         return res
+    
+    def diff(self, other: statement) -> str:
+        if not isinstance(other, statement):
+            raise ValueError("The other object must be an instance of statement")
+        
+        res = ""
+        if self.date != other.date:
+            res += f"Date: {self.date} -> {other.date}\n"
+        
+        # Compare account structures
+        diff_acc_struct = self.account.diff(other.account)
+        if len(diff_acc_struct) > 0:
+            res += "Account Structure Differences:\n"
+            res +=diff_acc_struct
+        
+        # Compare FX markets
+        res_fx = ""
+        for (k, v) in self.fx_market.quotes.items():
+            if k in other.fx_market.quotes:
+                if v != other.fx_market.quotes[k]:
+                    res_fx += f"{k[0].name}/{k[1].name}: {v} -> {other.fx_market.quotes[k]}\n"
+            else:
+                res_fx += f"{k[0].name}/{k[1].name}: {v} -> Not present in other statement\n"
+        
+        for (k, v) in other.fx_market.quotes.items():
+            if k not in self.fx_market.quotes:
+                res_fx += f"{k[0].name}/{k[1].name}: Not present in this statement -> {round(v,6)}\n"
+        if len(res_fx) > 0:
+            res += "FX Market Differences:\n"
+            res += res_fx
+        return res

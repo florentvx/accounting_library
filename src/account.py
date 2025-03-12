@@ -199,4 +199,60 @@ class account:
                 sub_accounts=[acc.copy() for acc in self.sub_accounts]
             )
         
+    def diff(self, other: account, memory: str = "") -> str:
+        if not isinstance(other, account):
+            raise ValueError("The other object must be an instance of account")
+        
+        title = f"Account Differences for {memory + self.name}:\n"
+        res = ""
+        test_res = False
+        test_res_2 = False
+        
+        # Compare names
+        if self.name != other.name:
+            test_res = True
+            res += f"  Name: {self.name} -> {other.name}\n"
+        
+        # Compare types
+        if self.is_terminal != other.is_terminal:
+            test_res = True
+            res += f"  Type: {'Terminal' if self.is_terminal else 'Folder'} -> {'Terminal' if other.is_terminal else 'Folder'}\n"
+
+        # Compare units
+        if self.unit != other.unit:
+            test_res = True
+            res += f"Unit: {self.unit.name} -> {other.unit.name}\n"
+        
+        if self.is_terminal and other.is_terminal:
+            # Compare values
+            if self.value != other.value:
+                test_res = True
+                res += f"Value: {self.value} -> {other.value}\n"
+        
+        if not self.is_terminal and not other.is_terminal:
+            # Compare sub-accounts
+            self_sub_accounts = {sub_acc.name: sub_acc for sub_acc in self.sub_accounts}
+            other_sub_accounts = {sub_acc.name: sub_acc for sub_acc in other.sub_accounts}
+            
+            for name, sub_acc in self_sub_accounts.items():
+                if name in other_sub_accounts:
+                    sub_acc_diff = sub_acc.diff(other_sub_accounts[name], memory=memory + self.name + "/")
+                    if sub_acc_diff != "":
+                        test_res_2 = True
+                        res += sub_acc_diff
+                else:
+                    test_res = True
+                    res += f"Missing Sub-Account {name}\n"
+            
+            for name, sub_acc in other_sub_accounts.items():
+                if name not in self_sub_accounts:
+                    test_res = True
+                    res += f"New Sub-Account {name}\n"
+        if test_res:
+            return title + res
+        if test_res_2:
+            return res
+        return ""
+
+        
 
